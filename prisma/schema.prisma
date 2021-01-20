@@ -1,0 +1,94 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model ekonomik {
+  id          Int    @id @default(autoincrement())
+  description String
+  PW          Float
+  IW          Float
+  ES          Float
+  NB          Float
+  CO          Float
+}
+
+model modul_button_colors {
+  id          Int          @id @default(autoincrement())
+  code        String
+  description String
+  modul_line  modul_line[]
+}
+
+model modul_frames {
+  id                          Int          @id @default(autoincrement())
+  series                      Int
+  code                        String
+  description                 String
+  series_modul_framesToseries series       @relation(fields: [series], references: [id])
+  modul_line                  modul_line[]
+}
+
+model modul_line {
+  id                        Int                 @id @default(autoincrement())
+  btn_color                 Int
+  frame                     Int
+  switch_type               Int
+  price                     Float
+  series                    Int
+  modul_button_colors       modul_button_colors @relation(fields: [btn_color], references: [id])
+  modul_frames              modul_frames        @relation(fields: [frame], references: [id])
+  series_modul_lineToseries series              @relation(fields: [series], references: [id])
+  modul_switches            modul_switches      @relation(fields: [switch_type], references: [id])
+}
+
+model modul_switches {
+  id          Int          @id @default(autoincrement())
+  description String
+  width       String
+  modul_line  modul_line[]
+}
+
+model offer {
+  id             Int              @id @default(autoincrement())
+  products       Int?
+  description    String
+  offer_products offer_products[]
+}
+
+model pricelist {
+  id                                       Int              @id @default(autoincrement())
+  code                                     String
+  num_code                                 String?
+  description                              String
+  product_family                           Int?
+  price                                    Float
+  product_family_pricelistToproduct_family product_family?  @relation(fields: [product_family], references: [id])
+  offer_products                           offer_products[]
+}
+
+model product_family {
+  id          Int         @id @default(autoincrement())
+  description String
+  pricelist   pricelist[]
+}
+
+model series {
+  id           Int            @id @default(autoincrement())
+  description  String
+  modul_frames modul_frames[]
+  modul_line   modul_line[]
+}
+
+model offer_products {
+  rec_id     Int        @id @default(autoincrement())
+  offer_id   Int?
+  product_id Int?
+  qty        Int
+  offer      offer?     @relation(fields: [offer_id], references: [id])
+  pricelist  pricelist? @relation(fields: [product_id], references: [id])
+}
